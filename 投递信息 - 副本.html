@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>求职投递记录表 · 云端同步版</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.15s ease;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #dc2626;
+            --success: #059669;
+            --warning: #d97706;
+
+            --input-height: 38px;
+            --input-padding: 7px 10px;
+            --input-font: 0.84rem;
+            --input-border: 2px solid #e2e8f0;
+            --input-radius: 6px;
+            --input-bg: #fafbfc;
+
+        /* 状态颜色 */
+        --status-rejected-bg: #fee2e2;
+        --status-rejected-text: #991b1b;
+        --status-screening-bg: #dbeafe;
+        --status-screening-text: #1e40af;
+        --status-processing-bg: #ffedd5;
+        --status-processing-text: #9a3412;
+        --status-waiting-bg: #ede9fe;
+        --status-waiting-text: #5b21b6;
+        --status-ended-bg: #f1f5f9;
+        --status-ended-text: #334155;
+
+        /* 公司类型颜色 */
+        --type-research-bg: #ccfbf1;
+        --type-research-text: #115e59;
+        --type-private-bg: #dbeafe;
+        --type-private-text: #1e40af;
+        --type-auto-bg: #dcfce7;
+        --type-auto-text: #166534;
+        --type-state-bg: #fef9c3;
+        --type-state-text: #854d0e;
+        --type-foreign-bg: #ede9fe;
+        --type-foreign-text: #5b21b6;
+
+        /* 进度颜色 */
+        --progress-deliver-bg: #dbeafe;
+        --progress-deliver-text: #1e40af;
+        --progress-assessment-bg: #ffedd5;
+        --progress-assessment-text: #c2410c;
+        --progress-exam-bg: #fef9c3;
+        --progress-exam-text: #a16207;
+        --progress-ai-bg: #ede9fe;
+        --progress-ai-text: #6b21a8;
+        --progress-first-bg: #fce7f3;
+        --progress-first-text: #9d174d;
+        --progress-second-bg: #e0e7ff;
+        --progress-second-text: #3730a3;
+        --progress-third-bg: #cffafe;
+        --progress-third-text: #0e7490;
+        --progress-final-bg: #dcfce7;
+        --progress-final-text: #15803d;
+        --progress-offer-bg: #fff7ed;
+        --progress-offer-text: #c2410c;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    .container { max-width: 1500px; margin: 0 auto; }
+
+    /* ===== Header ===== */
+    .header {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 16px 24px;
+        margin-bottom: 14px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-icon {
+        width: 36px; height: 36px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #4f46e5, #818cf8);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; color: #fff; flex-shrink: 0;
+    }
+    .header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header-subtitle { font-size: 0.78rem; color: #64748b; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* Cloud status indicator */
+    .cloud-status {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 0.75rem; font-weight: 600; padding: 5px 10px;
+        border-radius: 20px; white-space: nowrap;
+    }
+    .cloud-status.on { background: #dcfce7; color: #15803d; }
+    .cloud-status.off { background: #f1f5f9; color: #64748b; }
+    .cloud-status.syncing { background: #dbeafe; color: #1e40af; animation: pulse 1.2s infinite; }
+    .cloud-status.error { background: #fee2e2; color: #991b1b; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+    /* ===== Buttons ===== */
+    .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+        padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+        cursor: pointer; border: none; transition: var(--transition);
+        background: #fff; color: #334155; border: 2px solid #e2e8f0;
+        white-space: nowrap; letter-spacing: 0.01em;
+        height: var(--input-height); box-sizing: border-box;
+    }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .btn-danger { color: var(--danger); border-color: #fecaca; }
+    .btn-danger:hover { background: #fff5f5; border-color: #fca5a5; }
+    .btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+    .btn-success:hover { background: #047857; }
+    .btn-sm { padding: 6px 13px; font-size: 0.78rem; height: 34px; }
+    .btn-xs { padding: 3px 8px; font-size: 0.72rem; border-radius: 5px; height: auto; }
+    .btn-icon {
+        width: 36px; height: 36px; padding: 0; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; background: #f1f5f9; border: 2px solid #e2e8f0; cursor: pointer;
+        transition: var(--transition); position: relative;
+    }
+    .btn-icon:hover { background: #e2e8f0; }
+    .btn-icon.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+    /* ===== Stats ===== */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px; margin-bottom: 14px;
+    }
+    .stat-card {
+        background: #fff; border-radius: var(--radius-sm);
+        padding: 10px 14px; box-shadow: var(--shadow);
+        display: flex; align-items: center; gap: 8px;
+    }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .stat-value { font-size: 1.3rem; font-weight: 700; line-height: 1.1; }
+    .stat-label { font-size: 0.7rem; color: #64748b; }
+
+    /* ===== Settings Panel ===== */
+    .settings-panel {
+        background: #fff; border-radius: var(--radius);
+        padding: 0; margin-bottom: 14px; box-shadow: var(--shadow);
+        max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+    .settings-panel.open {
+        max-height: 500px; padding: 16px 20px;
+    }
+    .settings-panel h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .settings-grid {
+        display: grid; grid-template-columns: 1fr 1fr auto;
+        gap: 10px; align-items: end;
+    }
+    .settings-grid input {
+        padding: var(--input-padding);
+        border: var(--input-border); border-radius: var(--input-radius);
+        font-size: var(--input-font); font-family: inherit;
+        background: var(--input-bg); transition: var(--transition);
+        width: 100%; height: var(--input-height); box-sizing: border-box;
+    }
+    .settings-grid input:focus {
+        outline: none; border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.08); background: #fff;
+    }
+    .settings-note {
+        font-size: 0.75rem; color: #64748b; margin-top: 10px;
+        line-height: 1.6;
+    }
+    .settings-note a { color: #4f46e5; }
+    .settings-note code {
+        background: #f1f5f9; padding: 1px 5px; border-radius: 3px;
+        font-size: 0.72rem;
+    }
+    .sync-info {
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;
+    }
+
+    /* ===== Form ===== */
+    .form-card {
+        background: #fff; border-radius: var(--radius);
+        padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .form-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 12px; cursor: pointer; user-select: none;
+    }
+    .form-card-header h3 {
+        font-size: 0.95rem; font-weight: 700;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .toggle-icon { color: #94a3b8; font-size: 1rem; transition: var(--transition); }
+    .form-card.collapsed .form-grid { display: none; }
+    .form-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+
+    .form-grid {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 11px; row-gap: 11px; align-items: end;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label {
+        font-size: 0.75rem; font-weight: 600; color: #334155;
+        line-height: 1; white-space: nowrap;
+    }
+    .form-group input,
+    .form-group select {
+        padding: var(--input-padding);
+        border: var(--input-border); border-radius: var(--input-radius);
+        font-size: var(--input-font); font-family: inherit;
+        background: var(--input-bg); transition: var(--transition);
+        width: 100%; height: var(--input-height); line-height: 1.35;
+        box-sizing: border-box; color: #1e293b;
+    }
+    .form-group input:hover, .form-group select:hover { border-color: #cbd5e1; background: #fff; }
+    .form-group input:focus, .form-group select:focus {
+        outline: none; border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.08); background: #fff;
+    }
+    .form-group input::placeholder { color: #94a3b8; font-size: 0.8rem; }
+    .form-group select {
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 9px center;
+        padding-right: 28px; cursor: pointer;
+    }
+    .form-actions {
+        display: flex; gap: 7px; align-self: end; padding-bottom: 0;
+    }
+    .form-actions .btn { height: var(--input-height); padding: 7px 15px; font-size: 0.84rem; }
+
+    /* ===== Table ===== */
+    .table-card {
+        background: #fff; border-radius: var(--radius);
+        padding: 16px 20px; box-shadow: var(--shadow);
+    }
+    .table-header {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+    }
+    .table-header h3 { font-size: 0.95rem; font-weight: 700; }
+    .search-box input {
+        padding: 6px 10px; border: 2px solid #e2e8f0; border-radius: 6px;
+        font-size: 0.82rem; width: 180px; height: 35px;
+        background: #fafbfc; box-sizing: border-box;
+    }
+    .search-box input:focus {
+        border-color: #4f46e5; width: 220px; outline: none;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.06);
+    }
+    .filter-select {
+        padding: 6px 26px 6px 10px; border: 2px solid #e2e8f0;
+        border-radius: 6px; font-size: 0.82rem; height: 35px;
+        background: #fafbfc; appearance: none; box-sizing: border-box;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 7px center;
+        cursor: pointer;
+    }
+    .filter-select:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.06); }
+    .group-toggle {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 0.82rem; font-weight: 500; cursor: pointer; white-space: nowrap;
+    }
+    .group-toggle input { width: 15px; height: 15px; cursor: pointer; }
+
+    .table-wrapper { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid #e2e8f0; }
+    table { width: 100%; border-collapse: collapse; min-width: 1050px; font-size: 0.83rem; }
+    thead { background: #f8fafc; }
+    thead th {
+        padding: 10px 8px; text-align: left; font-weight: 700;
+        color: #475569; font-size: 0.72rem; letter-spacing: 0.04em;
+        text-transform: uppercase; border-bottom: 2px solid #e2e8f0; white-space: nowrap;
+    }
+    tbody td { padding: 9px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tbody tr:hover { background: #fafbfc; }
+    .badge {
+        display: inline-block; padding: 3px 10px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+        border: 1.5px solid transparent;
+    }
+
+    .badge-status-rejected { background: var(--status-rejected-bg); color: var(--status-rejected-text); border-color: #fecaca; }
+    .badge-status-screening { background: var(--status-screening-bg); color: var(--status-screening-text); border-color: #bfdbfe; }
+    .badge-status-processing { background: var(--status-processing-bg); color: var(--status-processing-text); border-color: #fed7aa; }
+    .badge-status-waiting { background: var(--status-waiting-bg); color: var(--status-waiting-text); border-color: #d8b4fe; }
+    .badge-status-ended { background: var(--status-ended-bg); color: var(--status-ended-text); border-color: #cbd5e1; }
+
+    .badge-type-research { background: var(--type-research-bg); color: var(--type-research-text); border-color: #99f6e4; }
+    .badge-type-private { background: var(--type-private-bg); color: var(--type-private-text); border-color: #bfdbfe; }
+    .badge-type-auto { background: var(--type-auto-bg); color: var(--type-auto-text); border-color: #bbf7d0; }
+    .badge-type-state { background: var(--type-state-bg); color: var(--type-state-text); border-color: #fde68a; }
+    .badge-type-foreign { background: var(--type-foreign-bg); color: var(--type-foreign-text); border-color: #d8b4fe; }
+
+    .badge-progress-deliver { background: var(--progress-deliver-bg); color: var(--progress-deliver-text); border-color: #bfdbfe; }
+    .badge-progress-assessment { background: var(--progress-assessment-bg); color: var(--progress-assessment-text); border-color: #fed7aa; }
+    .badge-progress-exam { background: var(--progress-exam-bg); color: var(--progress-exam-text); border-color: #fef08a; }
+    .badge-progress-ai { background: var(--progress-ai-bg); color: var(--progress-ai-text); border-color: #d8b4fe; }
+    .badge-progress-first { background: var(--progress-first-bg); color: var(--progress-first-text); border-color: #f9a8d4; }
+    .badge-progress-second { background: var(--progress-second-bg); color: var(--progress-second-text); border-color: #c7d2fe; }
+    .badge-progress-third { background: var(--progress-third-bg); color: var(--progress-third-text); border-color: #a5f3fc; }
+    .badge-progress-final { background: var(--progress-final-bg); color: var(--progress-final-text); border-color: #bbf7d0; }
+    .badge-progress-offer { background: var(--progress-offer-bg); color: var(--progress-offer-text); border-color: #fed7aa; }
+
+    .ellipsis-cell {
+        max-width: 120px; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap; display: block;
+    }
+    .link-cell { text-align: center; }
+    .link-cell a {
+        color: #4f46e5; text-decoration: none; font-size: 1rem;
+        transition: var(--transition); display: inline-block;
+    }
+    .link-cell a:hover { color: #4338ca; transform: scale(1.15); }
+    .link-cell a.no-link { color: #cbd5e1; cursor: default; }
+    .link-cell a.no-link:hover { transform: none; color: #cbd5e1; }
+
+    .action-btns { display: flex; gap: 5px; }
+    .btn-edit { background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; }
+    .btn-edit:hover { background: #dbeafe; }
+    .btn-delete { background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; }
+    .btn-delete:hover { background: #fee2e2; }
+
+    /* ===== Toast ===== */
+    .toast {
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        padding: 10px 20px; border-radius: 8px; color: #fff;
+        font-weight: 600; font-size: 0.85rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+    }
+    .toast-success { background: #059669; }
+    .toast-warning { background: #d97706; }
+    .toast-info { background: #4f46e5; }
+    .toast-error { background: #dc2626; }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(40px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 960px) {
+        .form-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; row-gap: 10px; }
+        .settings-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+        .form-grid { grid-template-columns: 1fr; gap: 9px; row-gap: 9px; }
+        .settings-grid { grid-template-columns: 1fr; }
+        .search-box input { width: 140px; }
+        .header { padding: 12px 16px; }
+        .form-card { padding: 12px 14px; }
+        .table-card { padding: 12px 14px; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <!-- ===== Header ===== -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">📋</div>
+            <div>
+                <h1>求职投递记录</h1>
+                <div class="header-subtitle">追踪进度 · 云端同步 · 多设备共享</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="cloud-status off" id="cloudStatusBadge" title="云同步状态">☁️ 仅本地</span>
+            <button class="btn-icon" id="btnSettings" onclick="toggleSettings()" title="云同步设置">⚙️</button>
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 导出CSV</button>
+            <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ 清空</button>
+        </div>
+    </div>
+
+    <!-- ===== Stats ===== -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card total"><div class="stat-dot"></div><div><div class="stat-value" id="statTotal">0</div><div class="stat-label">📊 总投递</div></div></div>
+        <div class="stat-card" style="border-left:3px solid #2563eb;"><div class="stat-dot" style="background:#2563eb;"></div><div><div class="stat-value" style="color:#2563eb;" id="statScreening">0</div><div class="stat-label">📝 筛选中</div></div></div>
+        <div class="stat-card" style="border-left:3px solid #ea580c;"><div class="stat-dot" style="background:#ea580c;"></div><div><div class="stat-value" style="color:#ea580c;" id="statProcessing">0</div><div class="stat-label">🔄 流程中</div></div></div>
+        <div class="stat-card" style="border-left:3px solid #7c3aed;"><div class="stat-dot" style="background:#7c3aed;"></div><div><div class="stat-value" style="color:#7c3aed;" id="statWaiting">0</div><div class="stat-label">⏳ 等结果</div></div></div>
+        <div class="stat-card" style="border-left:3px solid #dc2626;"><div class="stat-dot" style="background:#dc2626;"></div><div><div class="stat-value" style="color:#dc2626;" id="statRejected">0</div><div class="stat-label">❌ 已拒</div></div></div>
+    </div>
+
+    <!-- ===== Settings Panel ===== -->
+    <div class="settings-panel" id="settingsPanel">
+        <h3>☁️ 云同步设置 <span style="font-weight:400;font-size:0.78rem;color:#64748b;">— 配置后可跨设备同步</span></h3>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label>JSONBin API Key</label>
+                <input type="password" id="inputApiKey" placeholder="在 jsonbin.io 免费注册获取" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Bin ID（数据仓库ID）</label>
+                <input type="text" id="inputBinId" placeholder="自动创建或手动输入已有的" autocomplete="off">
+            </div>
+            <div class="form-actions" style="padding-top: 18px;">
+                <button class="btn btn-primary btn-sm" onclick="setupCloud()" id="btnSetupCloud">🔗 连接云端</button>
+                <button class="btn btn-outline btn-sm" onclick="createNewBin()" id="btnCreateBin">✨ 自动创建</button>
+            </div>
+        </div>
+        <div class="sync-info" id="syncInfo" style="display:none;">
+            <span id="syncStatusText" style="font-size:0.82rem;"></span>
+            <button class="btn btn-outline btn-xs" onclick="manualSync()" id="btnManualSync">🔄 手动同步</button>
+            <button class="btn btn-xs" style="color:#dc2626;border-color:#fecaca;" onclick="disconnectCloud()">🔌 断开云端</button>
+        </div>
+        <div class="settings-note">
+            📌 <strong>如何启用云端同步：</strong><br>
+            1️⃣ 访问 <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> 免费注册账号<br>
+            2️⃣ 在 Dashboard 复制你的 <code>API Key</code><br>
+            3️⃣ 点击"✨ 自动创建"按钮自动创建数据仓库，或手动粘贴已有的 Bin ID<br>
+            4️⃣ 在其他设备上输入相同的 <code>API Key</code> + <code>Bin ID</code> 即可同步<br>
+            ⚠️ 免费版每月10,000次请求，个人使用完全足够
+        </div>
+    </div>
+
+    <!-- ===== Form ===== -->
+    <div class="form-card" id="formCard">
+        <div class="form-card-header" onclick="toggleForm()">
+            <h3><span id="formTitleIcon">➕</span> <span id="formTitle">添加记录</span></h3>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>公司名称 *</label><input type="text" id="inputCompany" placeholder="如：字节跳动"></div>
+            <div class="form-group"><label>状态 *</label><select id="inputStatus"><option value="">请选择</option><option value="简历筛选">📝 简历筛选</option><option value="流程中">🔄 流程中</option><option value="等结果">⏳ 等结果</option><option value="已拒">❌ 已拒</option><option value="已结束">🏁 已结束</option></select></div>
+            <div class="form-group"><label>公司类型</label><select id="inputCompanyType"><option value="">请选择</option><option value="研究院">🔬 研究院</option><option value="私企">💼 私企</option><option value="车企">🚗 车企</option><option value="国企">🏛️ 国企</option><option value="外企">🌍 外企</option></select></div>
+            <div class="form-group"><label>投递时间</label><input type="date" id="inputDate"></div>
+            <div class="form-group"><label>岗位</label><input type="text" id="inputPosition" placeholder="如：感知算法工程师"></div>
+            <div class="form-group"><label>工作地点</label><input type="text" id="inputLocation" placeholder="如：北京"></div>
+            <div class="form-group"><label>进度</label><select id="inputProgress"><option value="">请选择</option><option value="投递">📨 投递</option><option value="评测">📊 评测</option><option value="笔试">✍️ 笔试</option><option value="AI面试">🤖 AI面试</option><option value="一面">1️⃣ 一面</option><option value="二面">2️⃣ 二面</option><option value="三面">👥 三面</option><option value="终面">🎯 终面</option><option value="提供">🎉 提供</option></select></div>
+            <div class="form-group"><label>🔗 投递链接</label><input type="url" id="inputApplyLink" placeholder="https://... 公司投递入口链接"></div>
+            <div class="form-actions" style="grid-column: span 2;">
+                <button class="btn btn-primary" id="btnSubmit" onclick="submitRecord()">✅ 添加</button>
+                <button class="btn btn-outline" id="btnCancel" style="display:none;" onclick="cancelEdit()">✖️ 取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Table ===== -->
+    <div class="table-card">
+        <div class="table-header">
+            <div>
+                <h3>📋 投递列表 <span style="font-weight:400;font-size:0.8rem;color:#64748b;" id="tableInfo">(0条)</span></h3>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <select class="filter-select" id="filterStatus" onchange="renderTable()">
+                    <option value="全部">全部状态</option><option value="简历筛选">简历筛选</option><option value="流程中">流程中</option><option value="等结果">等结果</option><option value="已拒">已拒</option><option value="已结束">已结束</option>
+                </select>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 搜索公司/岗位" oninput="renderTable()">
+                </div>
+                <label class="group-toggle" title="按公司合并显示多岗位">
+                    <input type="checkbox" id="groupByCompany" onchange="renderTable()"> 📁 按公司分组
+                </label>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:28px;"></th>
+                        <th>公司</th>
+                        <th>状态</th>
+                        <th>类型</th>
+                        <th>投递时间</th>
+                        <th>岗位</th>
+                        <th>地点</th>
+                        <th>进度</th>
+                        <th style="width:44px;">链接</th>
+                        <th style="width:65px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+// ==================== Constants ====================
+const STORAGE_KEY = 'job_app_v3';
+const SETTINGS_KEY = 'job_app_cloud_settings';
+const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
+
+let records = [];
+let editingId = null;
+let cloudSettings = { apiKey: '', binId: '', autoSync: true, lastSync: null };
+
+// ==================== Settings / Cloud Config ====================
+function loadCloudSettings() {
+    try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        if (raw) cloudSettings = JSON.parse(raw);
+    } catch(e) { cloudSettings = { apiKey: '', binId: '', autoSync: true, lastSync: null }; }
+    document.getElementById('inputApiKey').value = cloudSettings.apiKey || '';
+    document.getElementById('inputBinId').value = cloudSettings.binId || '';
+}
+
+function saveCloudSettings() {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(cloudSettings));
+    updateCloudUI();
+}
+
+function isCloudConfigured() {
+    return !!(cloudSettings.apiKey && cloudSettings.binId);
+}
+
+function updateCloudUI() {
+    const badge = document.getElementById('cloudStatusBadge');
+    const syncInfo = document.getElementById('syncInfo');
+    const syncText = document.getElementById('syncStatusText');
+
+    if (isCloudConfigured()) {
+        badge.className = 'cloud-status on';
+        badge.textContent = '☁️ 已连接云端';
+        badge.title = `Bin: ${cloudSettings.binId}`;
+        document.getElementById('btnSettings').classList.add('active');
+        syncInfo.style.display = 'flex';
+        if (cloudSettings.lastSync) {
+            syncText.textContent = `✅ 上次同步: ${new Date(cloudSettings.lastSync).toLocaleString('zh-CN')}`;
+        } else {
+            syncText.textContent = '📌 已配置，等待首次同步';
+        }
+    } else {
+        badge.className = 'cloud-status off';
+        badge.textContent = '☁️ 仅本地';
+        badge.title = '未配置云同步';
+        document.getElementById('btnSettings').classList.remove('active');
+        syncInfo.style.display = 'none';
+    }
+}
+
+function setSyncStatus(status) {
+    const badge = document.getElementById('cloudStatusBadge');
+    switch(status) {
+        case 'syncing':
+            badge.className = 'cloud-status syncing';
+            badge.textContent = '⏳ 同步中...';
+            break;
+        case 'error':
+            badge.className = 'cloud-status error';
+            badge.textContent = '⚠️ 同步失败';
+            break;
+        case 'on':
+            badge.className = 'cloud-status on';
+            badge.textContent = '☁️ 已连接云端';
+            break;
+        default:
+            updateCloudUI();
+    }
+}
+
+function toggleSettings() {
+    document.getElementById('settingsPanel').classList.toggle('open');
+}
+
+// ==================== Cloud Sync (JSONBin.io) ====================
+async function cloudFetch() {
+    if (!isCloudConfigured()) return null;
+    try {
+        const resp = await fetch(`${JSONBIN_API}/${cloudSettings.binId}/latest`, {
+            headers: { 'X-Access-Key': cloudSettings.apiKey }
+        });
+        if (!resp.ok) {
+            if (resp.status === 404) { showToast('云端 Bin 不存在，请重新创建', 'error'); return null; }
+            if (resp.status === 401 || resp.status === 403) { showToast('API Key 无效', 'error'); return null; }
+            throw new Error(`HTTP ${resp.status}`);
+        }
+        const json = await resp.json();
+        return json.record; // the data is in .record
+    } catch(e) {
+        console.error('Cloud fetch error:', e);
+        showToast('云端读取失败: ' + e.message, 'error');
+        return null;
+    }
+}
+
+async function cloudPush(data) {
+    if (!isCloudConfigured()) return false;
+    try {
+        const resp = await fetch(`${JSONBIN_API}/${cloudSettings.binId}`, {
+            method: 'PUT',
+            headers: {
+                'X-Access-Key': cloudSettings.apiKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        cloudSettings.lastSync = new Date().toISOString();
+        saveCloudSettings();
+        return true;
+    } catch(e) {
+        console.error('Cloud push error:', e);
+        showToast('云端保存失败: ' + e.message, 'error');
+        return false;
+    }
+}
+
+async function createNewBin() {
+    const apiKey = document.getElementById('inputApiKey').value.trim();
+    if (!apiKey) { showToast('请先输入 API Key', 'warning'); return; }
+
+    setSyncStatus('syncing');
+    try {
+        const initialData = {
+            v: 3,
+            lastModified: new Date().toISOString(),
+            records: records
+        };
+        const resp = await fetch(JSONBIN_API, {
+            method: 'POST',
+            headers: {
+                'X-Access-Key': apiKey,
+                'X-Bin-Name': 'Job-Tracker',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(initialData)
+        });
+        if (!resp.ok) {
+            if (resp.status === 401 || resp.status === 403) {
+                showToast('API Key 无效，请检查', 'error');
+            } else {
+                showToast('创建失败: HTTP ' + resp.status, 'error');
+            }
+            setSyncStatus('error');
+            return;
+        }
+        const json = await resp.json();
+        const binId = json.metadata.id;
+
+        cloudSettings.apiKey = apiKey;
+        cloudSettings.binId = binId;
+        cloudSettings.lastSync = new Date().toISOString();
+        saveCloudSettings();
+        document.getElementById('inputBinId').value = binId;
+
+        showToast('✅ 云端仓库创建成功！Bin ID: ' + binId, 'success');
+        setSyncStatus('on');
+        alert('🎉 云端同步已就绪！\n\n你的 Bin ID 是: ' + binId + '\n\n在其他设备上输入相同的 API Key 和这个 Bin ID，数据就能自动同步了。\n\n请务必保存好 Bin ID！');
+    } catch(e) {
+        console.error('Create bin error:', e);
+        showToast('创建失败: ' + e.message, 'error');
+        setSyncStatus('error');
+    }
+}
+
+async function setupCloud() {
+    const apiKey = document.getElementById('inputApiKey').value.trim();
+    const binId = document.getElementById('inputBinId').value.trim();
+
+    if (!apiKey) { showToast('请输入 API Key', 'warning'); return; }
+    if (!binId) { showToast('请输入 Bin ID 或点击"自动创建"', 'warning'); return; }
+
+    cloudSettings.apiKey = apiKey;
+    cloudSettings.binId = binId;
+    setSyncStatus('syncing');
+
+    // Try to fetch from cloud to verify connection
+    const cloudData = await cloudFetch();
+    if (cloudData !== null) {
+        // Cloud data exists - decide merge strategy
+        if (cloudData.records && cloudData.records.length > 0) {
+            if (records.length > 0) {
+                // Both have data - cloud wins
+                if (confirm(`云端有 ${cloudData.records.length} 条记录，本地有 ${records.length} 条。\n\n是否用云端数据覆盖本地？（点击"取消"将用本地数据覆盖云端）`)) {
+                    records = cloudData.records;
+                } else {
+                    await cloudPush({ v: 3, lastModified: new Date().toISOString(), records: records });
+                }
+            } else {
+                // Only cloud has data
+                records = cloudData.records;
+            }
+        } else if (records.length > 0) {
+            // Only local has data - push to cloud
+            await cloudPush({ v: 3, lastModified: new Date().toISOString(), records: records });
+        }
+
+        cloudSettings.lastSync = new Date().toISOString();
+        saveCloudSettings();
+        saveLocalRecords();
+        renderTable();
+        updateStats();
+        showToast('✅ 云端连接成功！', 'success');
+        setSyncStatus('on');
+    } else {
+        // Fetch failed but maybe bin doesn't exist yet
+        cloudSettings.apiKey = '';
+        cloudSettings.binId = '';
+        saveCloudSettings();
+        setSyncStatus('error');
+    }
+}
+
+function disconnectCloud() {
+    if (!confirm('断开云端连接？本地数据不会丢失。')) return;
+    cloudSettings.apiKey = '';
+    cloudSettings.binId = '';
+    cloudSettings.lastSync = null;
+    saveCloudSettings();
+    document.getElementById('inputApiKey').value = '';
+    document.getElementById('inputBinId').value = '';
+    setSyncStatus('off');
+    showToast('已断开云端连接，仅本地保存', 'info');
+}
+
+async function manualSync() {
+    if (!isCloudConfigured()) { showToast('请先配置云同步', 'warning'); return; }
+    setSyncStatus('syncing');
+    const cloudData = await cloudFetch();
+    if (cloudData && cloudData.records) {
+        if (cloudData.lastModified && cloudSettings.lastSync) {
+            const cloudTime = new Date(cloudData.lastModified).getTime();
+            const localTime = new Date(cloudSettings.lastSync).getTime();
+            if (cloudTime <= localTime && records.length > 0) {
+                // Local is newer, push to cloud
+                await cloudPush({ v: 3, lastModified: new Date().toISOString(), records: records });
+                showToast('✅ 本地数据已推送到云端', 'success');
+                setSyncStatus('on');
+                return;
+            }
+        }
+        // Cloud is newer or no local changes
+        records = cloudData.records;
+        saveLocalRecords();
+        renderTable();
+        updateStats();
+        cloudSettings.lastSync = new Date().toISOString();
+        saveCloudSettings();
+        showToast('✅ 已从云端同步 ' + records.length + ' 条记录', 'success');
+        setSyncStatus('on');
+    } else {
+        // Cloud empty but we have local data
+        if (records.length > 0) {
+            await cloudPush({ v: 3, lastModified: new Date().toISOString(), records: records });
+            showToast('✅ 本地数据已上传到云端', 'success');
+        }
+        setSyncStatus('on');
+    }
+}
+
+async function autoSyncToCloud() {
+    if (!isCloudConfigured()) return;
+    const data = { v: 3, lastModified: new Date().toISOString(), records: records };
+    const ok = await cloudPush(data);
+    if (ok) setSyncStatus('on');
+    else setSyncStatus('error');
+}
+
+// ==================== Local Storage ====================
+function loadLocalRecords() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (data) records = JSON.parse(data);
+        else records = [];
+    } catch(e) { records = []; }
+    records.forEach(r => { if (!r.id) r.id = Date.now() + Math.random(); });
+    // Migrate old records that don't have applyLink
+    records.forEach(r => { if (r.applyLink === undefined) r.applyLink = ''; });
+}
+
+function saveLocalRecords() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+// ==================== Toast ====================
+function showToast(msg, type) {
+    type = type || 'info';
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2500);
+}
+
+// ==================== Form ====================
+function toggleForm() {
+    document.getElementById('formCard').classList.toggle('collapsed');
+}
+
+function resetForm() {
+    document.getElementById('inputCompany').value = '';
+    document.getElementById('inputStatus').value = '';
+    document.getElementById('inputCompanyType').value = '';
+    document.getElementById('inputDate').value = '';
+    document.getElementById('inputPosition').value = '';
+    document.getElementById('inputLocation').value = '';
+    document.getElementById('inputProgress').value = '';
+    document.getElementById('inputApplyLink').value = '';
+    document.getElementById('btnSubmit').textContent = '✅ 添加';
+    document.getElementById('btnCancel').style.display = 'none';
+    document.getElementById('formTitleIcon').textContent = '➕';
+    document.getElementById('formTitle').textContent = '添加记录';
+    editingId = null;
+    document.getElementById('formCard').classList.remove('collapsed');
+}
+
+async function submitRecord() {
+    const company = document.getElementById('inputCompany').value.trim();
+    const status = document.getElementById('inputStatus').value;
+    if (!company || !status) { showToast('公司名称和状态为必填', 'warning'); return; }
+    const record = {
+        id: editingId || Date.now(),
+        company,
+        status,
+        companyType: document.getElementById('inputCompanyType').value,
+        applyDate: document.getElementById('inputDate').value,
+        position: document.getElementById('inputPosition').value.trim(),
+        location: document.getElementById('inputLocation').value.trim(),
+        progress: document.getElementById('inputProgress').value,
+        applyLink: document.getElementById('inputApplyLink').value.trim(),
+        updatedAt: new Date().toISOString()
+    };
+    if (editingId) {
+        const idx = records.findIndex(r => r.id === editingId);
+        if (idx !== -1) records[idx] = record;
+        showToast('记录已更新', 'success');
+    } else {
+        records.unshift(record);
+        showToast('添加成功', 'success');
+    }
+    saveLocalRecords();
+    resetForm();
+    renderTable();
+    updateStats();
+    autoSyncToCloud();
+}
+
+function editRecord(id) {
+    const r = records.find(r => r.id === id);
+    if (!r) return;
+    editingId = id;
+    document.getElementById('inputCompany').value = r.company;
+    document.getElementById('inputStatus').value = r.status;
+    document.getElementById('inputCompanyType').value = r.companyType || '';
+    document.getElementById('inputDate').value = r.applyDate || '';
+    document.getElementById('inputPosition').value = r.position || '';
+    document.getElementById('inputLocation').value = r.location || '';
+    document.getElementById('inputProgress').value = r.progress || '';
+    document.getElementById('inputApplyLink').value = r.applyLink || '';
+    document.getElementById('btnSubmit').textContent = '✏️ 更新';
+    document.getElementById('btnCancel').style.display = 'inline-flex';
+    document.getElementById('formTitleIcon').textContent = '✏️';
+    document.getElementById('formTitle').textContent = '编辑记录';
+    document.getElementById('formCard').classList.remove('collapsed');
+    document.getElementById('inputCompany').focus();
+}
+
+function cancelEdit() { resetForm(); showToast('已取消', 'info'); }
+
+async function deleteRecord(id) {
+    if (!confirm('删除这条记录？')) return;
+    records = records.filter(r => r.id !== id);
+    if (editingId === id) resetForm();
+    saveLocalRecords();
+    renderTable();
+    updateStats();
+    showToast('已删除', 'info');
+    autoSyncToCloud();
+}
+
+async function clearAllData() {
+    if (!records.length) return;
+    if (confirm(`清空全部 ${records.length} 条记录？此操作会同步到云端。`)) {
+        records = [];
+        saveLocalRecords();
+        resetForm();
+        renderTable();
+        updateStats();
+        showToast('已清空', 'warning');
+        autoSyncToCloud();
+    }
+}
+
+function exportCSV() {
+    if (!records.length) { showToast('无数据', 'warning'); return; }
+    const headers = ['公司名称', '状态', '公司类型', '投递时间', '岗位', '工作地点', '进度', '投递链接'];
+    const rows = records.map(r => [r.company, r.status, r.companyType, r.applyDate, r.position, r.location, r.progress, r.applyLink]);
+    const BOM = '﻿';
+    let csv = BOM + headers.join(',') + '\n';
+    rows.forEach(row => csv += row.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',') + '\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `投递记录_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    showToast('导出成功', 'success');
+}
+
+// ==================== Helpers ====================
+function getStatusClass(s) {
+    const map = { '已拒': 'rejected', '简历筛选': 'screening', '流程中': 'processing', '等结果': 'waiting', '已结束': 'ended' };
+    return map[s] || '';
+}
+function getTypeClass(t) {
+    const map = { '研究院': 'research', '私企': 'private', '车企': 'auto', '国企': 'state', '外企': 'foreign' };
+    return map[t] || '';
+}
+function getProgressClass(p) {
+    const map = { '投递': 'deliver', '评测': 'assessment', '笔试': 'exam', 'AI面试': 'ai', '一面': 'first', '二面': 'second', '三面': 'third', '终面': 'final', '提供': 'offer' };
+    return map[p] || '';
+}
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+function escapeAttr(str) { return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ==================== Render ====================
+function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const filterStatus = document.getElementById('filterStatus').value;
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    const groupMode = document.getElementById('groupByCompany').checked;
+
+    let filtered = records;
+    if (filterStatus !== '全部') filtered = filtered.filter(r => r.status === filterStatus);
+    if (search) filtered = filtered.filter(r => r.company.toLowerCase().includes(search) || (r.position || '').toLowerCase().includes(search) || (r.location || '').toLowerCase().includes(search));
+
+    document.getElementById('tableInfo').textContent = `(${filtered.length}条${filtered.length !== records.length ? ' / 总计'+records.length : ''})`;
+
+    if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">📭 暂无匹配记录</td></tr>`;
+        return;
+    }
+
+    if (groupMode) {
+        const groups = new Map();
+        filtered.forEach(r => {
+            const key = r.company;
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(r);
+        });
+        let html = '';
+        groups.forEach((items, company) => {
+            const first = items[0];
+            const typeClass = getTypeClass(first.companyType);
+            html += `<tr class="group-row" data-company="${escapeAttr(company)}" onclick="toggleGroup(this)" style="cursor:pointer;">
+                <td><span class="expand-icon">▶</span></td>
+                <td><strong>${escapeHtml(company)}</strong> <span style="color:#64748b;">(${items.length}岗)</span></td>
+                <td>—</td>
+                <td>${first.companyType ? `<span class="badge badge-type-${typeClass}">${escapeHtml(first.companyType)}</span>` : '-'}</td>
+                <td>—</td><td>—</td><td>—</td><td>—</td>
+                <td class="link-cell">—</td>
+                <td></td>
+            </tr>`;
+            items.forEach(r => {
+                const hasLink = !!(r.applyLink && r.applyLink.trim());
+                html += `<tr class="sub-row" style="display:none;" data-parent="${escapeAttr(company)}">
+                    <td></td>
+                    <td style="padding-left:28px;">└ ${escapeHtml(r.position || '未知岗位')}</td>
+                    <td><span class="badge badge-status-${getStatusClass(r.status)}">${escapeHtml(r.status)}</span></td>
+                    <td>${r.companyType ? `<span class="badge badge-type-${getTypeClass(r.companyType)}">${escapeHtml(r.companyType)}</span>` : '-'}</td>
+                    <td>${r.applyDate || '-'}</td>
+                    <td><span class="ellipsis-cell" title="${escapeAttr(r.position||'')}">${escapeHtml(r.position || '-')}</span></td>
+                    <td><span class="ellipsis-cell" title="${escapeAttr(r.location||'')}">${escapeHtml(r.location || '-')}</span></td>
+                    <td>${r.progress ? `<span class="badge badge-progress-${getProgressClass(r.progress)}">${escapeHtml(r.progress)}</span>` : '-'}</td>
+                    <td class="link-cell">${hasLink ? `<a href="${escapeAttr(r.applyLink)}" target="_blank" title="${escapeAttr(r.applyLink)}">🔗</a>` : `<a class="no-link" title="无链接">🔗</a>`}</td>
+                    <td><div class="action-btns"><button class="btn btn-xs btn-edit" onclick="event.stopPropagation();editRecord(${r.id})">✏️</button><button class="btn btn-xs btn-delete" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️</button></div></td>
+                </tr>`;
+            });
+        });
+        tbody.innerHTML = html;
+    } else {
+        tbody.innerHTML = filtered.map((r, i) => {
+            const hasLink = !!(r.applyLink && r.applyLink.trim());
+            return `<tr>
+                <td>${i+1}</td>
+                <td><strong>${escapeHtml(r.company)}</strong></td>
+                <td><span class="badge badge-status-${getStatusClass(r.status)}">${escapeHtml(r.status)}</span></td>
+                <td>${r.companyType ? `<span class="badge badge-type-${getTypeClass(r.companyType)}">${escapeHtml(r.companyType)}</span>` : '-'}</td>
+                <td>${r.applyDate || '-'}</td>
+                <td><span class="ellipsis-cell" title="${escapeAttr(r.position||'')}">${escapeHtml(r.position || '-')}</span></td>
+                <td><span class="ellipsis-cell" title="${escapeAttr(r.location||'')}">${escapeHtml(r.location || '-')}</span></td>
+                <td>${r.progress ? `<span class="badge badge-progress-${getProgressClass(r.progress)}">${escapeHtml(r.progress)}</span>` : '-'}</td>
+                <td class="link-cell">${hasLink ? `<a href="${escapeAttr(r.applyLink)}" target="_blank" title="${escapeAttr(r.applyLink)}">🔗</a>` : `<a class="no-link" title="无链接">🔗</a>`}</td>
+                <td><div class="action-btns"><button class="btn btn-xs btn-edit" onclick="editRecord(${r.id})">✏️</button><button class="btn btn-xs btn-delete" onclick="deleteRecord(${r.id})">🗑️</button></div></td>
+            </tr>`;
+        }).join('');
+    }
+}
+
+function toggleGroup(row) {
+    row.classList.toggle('expanded');
+    const company = row.dataset.company;
+    const subRows = document.querySelectorAll(`tr.sub-row[data-parent="${CSS.escape(company)}"]`);
+    const icon = row.querySelector('.expand-icon');
+    const isExpanded = row.classList.contains('expanded');
+    subRows.forEach(r => r.style.display = isExpanded ? '' : 'none');
+    if (icon) icon.textContent = isExpanded ? '▼' : '▶';
+}
+
+function updateStats() {
+    document.getElementById('statTotal').textContent = records.length;
+    document.getElementById('statScreening').textContent = records.filter(r => r.status === '简历筛选').length;
+    document.getElementById('statProcessing').textContent = records.filter(r => r.status === '流程中').length;
+    document.getElementById('statWaiting').textContent = records.filter(r => r.status === '等结果').length;
+    document.getElementById('statRejected').textContent = records.filter(r => r.status === '已拒').length;
+}
+
+// ==================== Init ====================
+async function init() {
+    loadCloudSettings();
+    loadLocalRecords();
+
+    if (isCloudConfigured()) {
+        setSyncStatus('syncing');
+        const cloudData = await cloudFetch();
+        if (cloudData && cloudData.records !== undefined) {
+            // Compare timestamps
+            if (cloudData.lastModified && cloudSettings.lastSync) {
+                const cloudTime = new Date(cloudData.lastModified).getTime();
+                const localTime = new Date(cloudSettings.lastSync).getTime();
+                if (cloudTime > localTime) {
+                    // Cloud is newer
+                    records = cloudData.records;
+                    saveLocalRecords();
+                    if (records.length) showToast(`📥 已从云端加载 ${records.length} 条记录`, 'info');
+                } else if (records.length > 0) {
+                    // Local may be newer - push to cloud
+                    await cloudPush({ v: 3, lastModified: new Date().toISOString(), records: records });
+                }
+            } else if (cloudData.records.length > 0 && records.length === 0) {
+                records = cloudData.records;
+                saveLocalRecords();
+                showToast(`📥 已从云端加载 ${records.length} 条记录`, 'info');
+            } else if (records.length > 0 && (!cloudData.records || cloudData.records.length === 0)) {
+                await cloudPush({ v: 3, lastModified: new Date().toISOString(), records: records });
+            }
+            cloudSettings.lastSync = new Date().toISOString();
+            saveCloudSettings();
+        }
+        setSyncStatus('on');
+    }
+
+    // Migrate records
+    records.forEach(r => { if (r.applyLink === undefined) r.applyLink = ''; });
+
+    updateCloudUI();
+    renderTable();
+    updateStats();
+}
+
+document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitRecord(); }
+    if (e.key === 'Escape' && editingId) { e.preventDefault(); cancelEdit(); }
+});
+
+init();
+</script>
+</body>
+</html>
