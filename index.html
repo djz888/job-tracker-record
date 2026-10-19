@@ -69,8 +69,10 @@
         --progress-third-text: #0e7490;
         --progress-final-bg: #dcfce7;
         --progress-final-text: #15803d;
-        --progress-offer-bg: #fff7ed;
-        --progress-offer-text: #c2410c;
+        --progress-offer-bg: #fef3c7;
+        --progress-offer-text: #92400e;
+        --progress-ended-bg: #f1f5f9;
+        --progress-ended-text: #475569;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -159,9 +161,27 @@
         background: #fff; border-radius: var(--radius-sm);
         padding: 10px 14px; box-shadow: var(--shadow);
         display: flex; align-items: center; gap: 8px;
+        border-left: 3px solid var(--accent, #4f46e5);
+        position: relative; transition: var(--transition);
     }
-    .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .stat-value { font-size: 1.3rem; font-weight: 700; line-height: 1.1; }
+    .stat-card.clickable { cursor: pointer; user-select: none; }
+    .stat-card.clickable:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .stat-card.active {
+        outline: 2px solid var(--accent, #4f46e5);
+        outline-offset: 1px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+    }
+    .stat-card.progress-card { background: linear-gradient(180deg, #fff 0%, #fcfdff 100%); }
+    .stat-card.dream-card { background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); }
+    .stat-dot {
+        width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        background: var(--accent, #4f46e5);
+    }
+    .stat-value { font-size: 1.3rem; font-weight: 700; line-height: 1.1; color: var(--value-color, var(--accent, var(--text))); }
     .stat-label { font-size: 0.7rem; color: #64748b; }
 
     /* ===== Settings Panel ===== */
@@ -323,9 +343,25 @@
     .badge-progress-ai { background: var(--progress-ai-bg); color: var(--progress-ai-text); border-color: #d8b4fe; }
     .badge-progress-first { background: var(--progress-first-bg); color: var(--progress-first-text); border-color: #f9a8d4; }
     .badge-progress-second { background: var(--progress-second-bg); color: var(--progress-second-text); border-color: #c7d2fe; }
-    .badge-progress-third { background: var(--progress-third-bg); color: var(--progress-third-text); border-color: #a5f3fc; }
-    .badge-progress-final { background: var(--progress-final-bg); color: var(--progress-final-text); border-color: #bbf7d0; }
-    .badge-progress-offer { background: var(--progress-offer-bg); color: var(--progress-offer-text); border-color: #fed7aa; }
+    .badge-progress-third { background: var(--progress-third-bg); color: var(--progress-third-text); border-color: #67e8f9; }
+    .badge-progress-final {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: var(--progress-final-text); border-color: #4ade80;
+        font-weight: 700; box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.15);
+    }
+    .badge-progress-offer {
+        background: linear-gradient(135deg, #fef9c3 0%, #fde68a 55%, #fbbf24 100%);
+        color: var(--progress-offer-text); border-color: #f59e0b;
+        font-weight: 800; letter-spacing: 0.02em;
+        padding: 4px 12px;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.18), 0 2px 10px rgba(245, 158, 11, 0.35);
+        animation: offerPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes offerPulse {
+        0%, 100% { box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.18), 0 2px 10px rgba(245, 158, 11, 0.30); }
+        50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28), 0 3px 16px rgba(245, 158, 11, 0.55); }
+    }
+    .badge-progress-ended { background: var(--progress-ended-bg); color: var(--progress-ended-text); border-color: #cbd5e1; }
 
     .ellipsis-cell {
         max-width: 120px; overflow: hidden;
@@ -399,11 +435,33 @@
 
     <!-- ===== Stats ===== -->
     <div class="stats-row" id="statsRow">
-        <div class="stat-card total"><div class="stat-dot"></div><div><div class="stat-value" id="statTotal">0</div><div class="stat-label">📊 总投递</div></div></div>
-        <div class="stat-card" style="border-left:3px solid #2563eb;"><div class="stat-dot" style="background:#2563eb;"></div><div><div class="stat-value" style="color:#2563eb;" id="statScreening">0</div><div class="stat-label">📝 筛选中</div></div></div>
-        <div class="stat-card" style="border-left:3px solid #ea580c;"><div class="stat-dot" style="background:#ea580c;"></div><div><div class="stat-value" style="color:#ea580c;" id="statProcessing">0</div><div class="stat-label">🔄 流程中</div></div></div>
-        <div class="stat-card" style="border-left:3px solid #7c3aed;"><div class="stat-dot" style="background:#7c3aed;"></div><div><div class="stat-value" style="color:#7c3aed;" id="statWaiting">0</div><div class="stat-label">⏳ 等结果</div></div></div>
-        <div class="stat-card" style="border-left:3px solid #dc2626;"><div class="stat-dot" style="background:#dc2626;"></div><div><div class="stat-value" style="color:#dc2626;" id="statRejected">0</div><div class="stat-label">❌ 已拒</div></div></div>
+        <div class="stat-card total clickable" style="--accent:#4f46e5;" data-stat-kind="all" onclick="toggleStatFilter(this)" title="点击查看全部投递">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statTotal" style="--value-color:#1e293b;">0</div><div class="stat-label">📊 总投递</div></div>
+        </div>
+        <div class="stat-card clickable" style="--accent:#2563eb;" data-stat-kind="status" data-stat-value="简历筛选" onclick="toggleStatFilter(this)" title="点击查看筛选中公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statScreening">0</div><div class="stat-label">📝 筛选中</div></div>
+        </div>
+        <div class="stat-card clickable" style="--accent:#ea580c;" data-stat-kind="status" data-stat-value="流程中" onclick="toggleStatFilter(this)" title="点击查看流程中公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statProcessing">0</div><div class="stat-label">🔄 流程中</div></div>
+        </div>
+        <div class="stat-card clickable" style="--accent:#7c3aed;" data-stat-kind="status" data-stat-value="等结果" onclick="toggleStatFilter(this)" title="点击查看等结果公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statWaiting">0</div><div class="stat-label">⏳ 等结果</div></div>
+        </div>
+        <div class="stat-card clickable" style="--accent:#dc2626;" data-stat-kind="status" data-stat-value="已拒" onclick="toggleStatFilter(this)" title="点击查看已拒公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statRejected">0</div><div class="stat-label">❌ 已拒</div></div>
+        </div>
+        <div class="stat-card clickable progress-card" style="--accent:#ca8a04;" data-stat-kind="progress" data-stat-value="笔试" onclick="toggleStatFilter(this)" title="点击查看笔试中的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statExam">0</div><div class="stat-label">✍️ 笔试</div></div>
+        </div>
+        <div class="stat-card clickable progress-card" style="--accent:#db2777;" data-stat-kind="progress" data-stat-value="一面" onclick="toggleStatFilter(this)" title="点击查看一面中的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statFirst">0</div><div class="stat-label">1️⃣ 一面</div></div>
+        </div>
+        <div class="stat-card clickable progress-card" style="--accent:#6366f1;" data-stat-kind="progress" data-stat-value="二面" onclick="toggleStatFilter(this)" title="点击查看二面中的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statSecond">0</div><div class="stat-label">2️⃣ 二面</div></div>
+        </div>
+        <div class="stat-card clickable progress-card dream-card" style="--accent:#16a34a;" data-stat-kind="progress" data-stat-value="终面" onclick="toggleStatFilter(this)" title="点击查看终面中的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statFinal">0</div><div class="stat-label">🎯 终面</div></div>
+        </div>
     </div>
 
     <!-- ===== Settings Panel ===== -->
@@ -467,7 +525,7 @@
                 <h3>📋 投递列表 <span style="font-weight:400;font-size:0.8rem;color:#64748b;" id="tableInfo">(0条)</span></h3>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <select class="filter-select" id="filterStatus" onchange="renderTable()">
+                <select class="filter-select" id="filterStatus" onchange="onStatusFilterChange()">
                     <option value="全部">全部状态</option><option value="简历筛选">简历筛选</option><option value="流程中">流程中</option><option value="等结果">等结果</option><option value="已拒">已拒</option><option value="已结束">已结束</option>
                 </select>
                 <div class="search-box">
@@ -510,6 +568,7 @@ const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
 
 let records = [];
 let editingId = null;
+let statFilter = null; // { kind: 'status' | 'progress', value: string }
 let cloudSettings = { apiKey: '', binId: '', autoSync: true, lastSync: null };
 
 // ==================== Settings / Cloud Config ====================
@@ -924,8 +983,14 @@ function getTypeClass(t) {
     return map[t] || '';
 }
 function getProgressClass(p) {
-    const map = { '投递': 'deliver', '评测': 'assessment', '笔试': 'exam', 'AI面试': 'ai', '一面': 'first', '二面': 'second', '三面': 'third', '终面': 'final', '提供': 'offer' };
+    const map = { '投递': 'deliver', '评测': 'assessment', '笔试': 'exam', 'AI面试': 'ai', '一面': 'first', '二面': 'second', '三面': 'third', '终面': 'final', 'Offer': 'offer', '结束': 'ended' };
     return map[p] || '';
+}
+function renderProgressBadge(p) {
+    if (!p) return '-';
+    const icons = { '投递': '📨', '评测': '📊', '笔试': '✍️', 'AI面试': '🤖', '一面': '1️⃣', '二面': '2️⃣', '三面': '👥', '终面': '🎯', 'Offer': '👑', '结束': '🏁' };
+    const icon = icons[p] ? icons[p] + ' ' : '';
+    return `<span class="badge badge-progress-${getProgressClass(p)}">${icon}${escapeHtml(p)}</span>`;
 }
 function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 function escapeAttr(str) { return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -938,10 +1003,16 @@ function renderTable() {
     const groupMode = document.getElementById('groupByCompany').checked;
 
     let filtered = records;
+    if (statFilter) {
+        filtered = filtered.filter(r =>
+            statFilter.kind === 'status' ? r.status === statFilter.value : r.progress === statFilter.value
+        );
+    }
     if (filterStatus !== '全部') filtered = filtered.filter(r => r.status === filterStatus);
     if (search) filtered = filtered.filter(r => r.company.toLowerCase().includes(search) || (r.position || '').toLowerCase().includes(search) || (r.location || '').toLowerCase().includes(search));
 
-    document.getElementById('tableInfo').textContent = `(${filtered.length}条${filtered.length !== records.length ? ' / 总计'+records.length : ''})`;
+    const filterLabel = statFilter ? ` · 筛选：${statFilter.value}` : '';
+    document.getElementById('tableInfo').textContent = `(${filtered.length}条${filtered.length !== records.length ? ' / 总计'+records.length : ''}${filterLabel})`;
 
     if (!filtered.length) {
         tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">📭 暂无匹配记录</td></tr>`;
@@ -978,7 +1049,7 @@ function renderTable() {
                     <td>${r.applyDate || '-'}</td>
                     <td><span class="ellipsis-cell" title="${escapeAttr(r.position||'')}">${escapeHtml(r.position || '-')}</span></td>
                     <td><span class="ellipsis-cell" title="${escapeAttr(r.location||'')}">${escapeHtml(r.location || '-')}</span></td>
-                    <td>${r.progress ? `<span class="badge badge-progress-${getProgressClass(r.progress)}">${escapeHtml(r.progress)}</span>` : '-'}</td>
+                    <td>${renderProgressBadge(r.progress)}</td>
                     <td class="link-cell">${hasLink ? `<a href="${escapeAttr(r.applyLink)}" target="_blank" title="${escapeAttr(r.applyLink)}">🔗</a>` : `<a class="no-link" title="无链接">🔗</a>`}</td>
                     <td><div class="action-btns"><button class="btn btn-xs btn-edit" onclick="event.stopPropagation();editRecord(${r.id})">✏️</button><button class="btn btn-xs btn-delete" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️</button></div></td>
                 </tr>`;
@@ -996,12 +1067,51 @@ function renderTable() {
                 <td>${r.applyDate || '-'}</td>
                 <td><span class="ellipsis-cell" title="${escapeAttr(r.position||'')}">${escapeHtml(r.position || '-')}</span></td>
                 <td><span class="ellipsis-cell" title="${escapeAttr(r.location||'')}">${escapeHtml(r.location || '-')}</span></td>
-                <td>${r.progress ? `<span class="badge badge-progress-${getProgressClass(r.progress)}">${escapeHtml(r.progress)}</span>` : '-'}</td>
+                <td>${renderProgressBadge(r.progress)}</td>
                 <td class="link-cell">${hasLink ? `<a href="${escapeAttr(r.applyLink)}" target="_blank" title="${escapeAttr(r.applyLink)}">🔗</a>` : `<a class="no-link" title="无链接">🔗</a>`}</td>
                 <td><div class="action-btns"><button class="btn btn-xs btn-edit" onclick="editRecord(${r.id})">✏️</button><button class="btn btn-xs btn-delete" onclick="deleteRecord(${r.id})">🗑️</button></div></td>
             </tr>`;
         }).join('');
     }
+}
+
+function toggleStatFilter(el) {
+    const kind = el.dataset.statKind;
+    const value = el.dataset.statValue || '';
+    const statusSelect = document.getElementById('filterStatus');
+
+    if (kind === 'all') {
+        statFilter = null;
+        statusSelect.value = '全部';
+    } else if (statFilter && statFilter.kind === kind && statFilter.value === value) {
+        statFilter = null;
+        if (kind === 'status') statusSelect.value = '全部';
+    } else {
+        statFilter = { kind, value };
+        statusSelect.value = kind === 'status' ? value : '全部';
+    }
+
+    updateStatActive();
+    renderTable();
+    if (statFilter) {
+        document.querySelector('.table-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function onStatusFilterChange() {
+    statFilter = null;
+    updateStatActive();
+    renderTable();
+}
+
+function updateStatActive() {
+    document.querySelectorAll('.stat-card').forEach(card => {
+        const kind = card.dataset.statKind;
+        const value = card.dataset.statValue || '';
+        const active = (!statFilter && kind === 'all') ||
+            (statFilter && statFilter.kind === kind && statFilter.value === value);
+        card.classList.toggle('active', active);
+    });
 }
 
 function toggleGroup(row) {
@@ -1020,6 +1130,10 @@ function updateStats() {
     document.getElementById('statProcessing').textContent = records.filter(r => r.status === '流程中').length;
     document.getElementById('statWaiting').textContent = records.filter(r => r.status === '等结果').length;
     document.getElementById('statRejected').textContent = records.filter(r => r.status === '已拒').length;
+    document.getElementById('statExam').textContent = records.filter(r => r.progress === '笔试').length;
+    document.getElementById('statFirst').textContent = records.filter(r => r.progress === '一面').length;
+    document.getElementById('statSecond').textContent = records.filter(r => r.progress === '二面').length;
+    document.getElementById('statFinal').textContent = records.filter(r => r.progress === '终面').length;
 }
 
 // ==================== Init ====================
@@ -1063,6 +1177,7 @@ async function init() {
     updateCloudUI();
     renderTable();
     updateStats();
+    updateStatActive();
 }
 
 document.addEventListener('keydown', e => {
