@@ -177,6 +177,11 @@
     }
     .stat-card.progress-card { background: linear-gradient(180deg, #fff 0%, #fcfdff 100%); }
     .stat-card.dream-card { background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); }
+    .stat-card.offer-card {
+        background: linear-gradient(180deg, #fffdf5 0%, #fef3c7 100%);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.14), 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    .stat-card.offer-card .stat-label { color: #92400e; font-weight: 600; }
     .stat-dot {
         width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
         background: var(--accent, #4f46e5);
@@ -438,20 +443,17 @@
         <div class="stat-card total clickable" style="--accent:#4f46e5;" data-stat-kind="all" onclick="toggleStatFilter(this)" title="点击查看全部投递">
             <div class="stat-dot"></div><div><div class="stat-value" id="statTotal" style="--value-color:#1e293b;">0</div><div class="stat-label">📊 总投递</div></div>
         </div>
-        <div class="stat-card clickable" style="--accent:#2563eb;" data-stat-kind="status" data-stat-value="简历筛选" onclick="toggleStatFilter(this)" title="点击查看筛选中公司">
-            <div class="stat-dot"></div><div><div class="stat-value" id="statScreening">0</div><div class="stat-label">📝 筛选中</div></div>
+        <div class="stat-card clickable progress-card" style="--accent:#2563eb;" data-stat-kind="progress" data-stat-value="投递" onclick="toggleStatFilter(this)" title="点击查看已投递公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statDeliver">0</div><div class="stat-label">📨 投递</div></div>
         </div>
-        <div class="stat-card clickable" style="--accent:#ea580c;" data-stat-kind="status" data-stat-value="流程中" onclick="toggleStatFilter(this)" title="点击查看流程中公司">
-            <div class="stat-dot"></div><div><div class="stat-value" id="statProcessing">0</div><div class="stat-label">🔄 流程中</div></div>
-        </div>
-        <div class="stat-card clickable" style="--accent:#7c3aed;" data-stat-kind="status" data-stat-value="等结果" onclick="toggleStatFilter(this)" title="点击查看等结果公司">
-            <div class="stat-dot"></div><div><div class="stat-value" id="statWaiting">0</div><div class="stat-label">⏳ 等结果</div></div>
-        </div>
-        <div class="stat-card clickable" style="--accent:#dc2626;" data-stat-kind="status" data-stat-value="已拒" onclick="toggleStatFilter(this)" title="点击查看已拒公司">
-            <div class="stat-dot"></div><div><div class="stat-value" id="statRejected">0</div><div class="stat-label">❌ 已拒</div></div>
+        <div class="stat-card clickable progress-card" style="--accent:#ea580c;" data-stat-kind="progress" data-stat-value="评测" onclick="toggleStatFilter(this)" title="点击查看评测中的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statAssessment">0</div><div class="stat-label">📊 评测</div></div>
         </div>
         <div class="stat-card clickable progress-card" style="--accent:#ca8a04;" data-stat-kind="progress" data-stat-value="笔试" onclick="toggleStatFilter(this)" title="点击查看笔试中的公司">
             <div class="stat-dot"></div><div><div class="stat-value" id="statExam">0</div><div class="stat-label">✍️ 笔试</div></div>
+        </div>
+        <div class="stat-card clickable progress-card" style="--accent:#7c3aed;" data-stat-kind="progress" data-stat-value="AI面试" onclick="toggleStatFilter(this)" title="点击查看 AI 面试中的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statAI">0</div><div class="stat-label">🤖 AI面试</div></div>
         </div>
         <div class="stat-card clickable progress-card" style="--accent:#db2777;" data-stat-kind="progress" data-stat-value="一面" onclick="toggleStatFilter(this)" title="点击查看一面中的公司">
             <div class="stat-dot"></div><div><div class="stat-value" id="statFirst">0</div><div class="stat-label">1️⃣ 一面</div></div>
@@ -461,6 +463,12 @@
         </div>
         <div class="stat-card clickable progress-card dream-card" style="--accent:#16a34a;" data-stat-kind="progress" data-stat-value="终面" onclick="toggleStatFilter(this)" title="点击查看终面中的公司">
             <div class="stat-dot"></div><div><div class="stat-value" id="statFinal">0</div><div class="stat-label">🎯 终面</div></div>
+        </div>
+        <div class="stat-card clickable progress-card offer-card" style="--accent:#d97706;" data-stat-kind="progress" data-stat-value="Offer" onclick="toggleStatFilter(this)" title="点击查看已获 Offer 的公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statOffer">0</div><div class="stat-label">👑 Offer</div></div>
+        </div>
+        <div class="stat-card clickable" style="--accent:#dc2626;" data-stat-kind="status" data-stat-value="已拒" onclick="toggleStatFilter(this)" title="点击查看已拒公司">
+            <div class="stat-dot"></div><div><div class="stat-value" id="statRejected">0</div><div class="stat-label">❌ 已拒</div></div>
         </div>
     </div>
 
@@ -1126,14 +1134,15 @@ function toggleGroup(row) {
 
 function updateStats() {
     document.getElementById('statTotal').textContent = records.length;
-    document.getElementById('statScreening').textContent = records.filter(r => r.status === '简历筛选').length;
-    document.getElementById('statProcessing').textContent = records.filter(r => r.status === '流程中').length;
-    document.getElementById('statWaiting').textContent = records.filter(r => r.status === '等结果').length;
-    document.getElementById('statRejected').textContent = records.filter(r => r.status === '已拒').length;
+    document.getElementById('statDeliver').textContent = records.filter(r => r.progress === '投递').length;
+    document.getElementById('statAssessment').textContent = records.filter(r => r.progress === '评测').length;
     document.getElementById('statExam').textContent = records.filter(r => r.progress === '笔试').length;
+    document.getElementById('statAI').textContent = records.filter(r => r.progress === 'AI面试').length;
     document.getElementById('statFirst').textContent = records.filter(r => r.progress === '一面').length;
     document.getElementById('statSecond').textContent = records.filter(r => r.progress === '二面').length;
     document.getElementById('statFinal').textContent = records.filter(r => r.progress === '终面').length;
+    document.getElementById('statOffer').textContent = records.filter(r => r.progress === 'Offer').length;
+    document.getElementById('statRejected').textContent = records.filter(r => r.status === '已拒').length;
 }
 
 // ==================== Init ====================
